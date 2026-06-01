@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <title>Portal Calendar</title>
+  <link rel="stylesheet" href="app.css"/>
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <div id="clock">
+        <div id="time">--:--</div>
+        <div id="date">&nbsp;</div>
+      </div>
+      <div id="account-box">
+        <div id="account">Portal Calendar</div>
+        <div id="synced" class="muted">&nbsp;</div>
+      </div>
+    </header>
+
+    <main id="agenda">
+      <div id="placeholder" class="placeholder">Waiting for first calendar sync…</div>
+      <div id="events"></div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

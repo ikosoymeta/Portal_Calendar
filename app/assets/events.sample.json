@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-06-02T08:30:00",
+  "account": "ikosoy@meta.com",
+  "events": [
+    { "title": "Tuesdays with Boz", "start": "2026-06-02T10:00:00", "end": "2026-06-02T10:30:00", "allDay": false, "location": "", "isVideoCall": true, "attendeeCount": 120, "status": "accepted" },
+    { "title": "Monthly MCO Priority Review", "start": "2026-06-02T11:05:00", "end": "2026-06-02T11:35:00", "allDay": false, "location": "MPK 21 - Cricket", "isVideoCall": true, "attendeeCount": 8, "status": "accepted" },
+    { "title": "Break", "start": "2026-06-02T12:00:00", "end": "2026-06-02T13:00:00", "allDay": false, "location": "", "isVideoCall": false, "attendeeCount": 0, "status": "accepted" },
+    { "title": "AMP Pod Check-In", "start": "2026-06-02T15:05:00", "end": "2026-06-02T16:00:00", "allDay": false, "location": "", "isVideoCall": true, "attendeeCount": 6, "status": "accepted" },
+    { "title": "Aquiva Weekly Sync-Up", "start": "2026-06-03T09:05:00", "end": "2026-06-03T09:30:00", "allDay": false, "location": "", "isVideoCall": true, "attendeeCount": 4, "status": "accepted" },
+    { "title": "Reminder: Data Integrity", "start": "2026-06-03T08:50:00", "end": "2026-06-03T09:00:00", "allDay": false, "location": "", "isVideoCall": false, "attendeeCount": 0, "status": "tentative" },
+    { "title": "VR Explorers", "start": "2026-06-04T09:35:00", "end": "2026-06-04T10:30:00", "allDay": false, "location": "", "isVideoCall": true, "attendeeCount": 15, "status": "accepted" }
+  ]
+}

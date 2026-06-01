@@ -1,0 +1,7 @@
+{
+  "title": "ikosoy@meta.com",
+  "daysAhead": 7,
+  "refreshMinutes": 15,
+  "timeFormat": "12h",
+  "maxEvents": 50
+}

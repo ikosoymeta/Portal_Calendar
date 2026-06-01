@@ -1,0 +1,15 @@
+# Per-user config (copy from exporter/config.example.json)
+exporter/config.json
+
+# Exporter output (regenerated each run)
+exporter/out/
+
+# Raw buck-named APK copy (the canonical artifact is dist/PortalCalendar.apk)
+dist/portal_calendar_arm64.apk
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

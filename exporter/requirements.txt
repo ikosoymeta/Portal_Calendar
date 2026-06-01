@@ -1,0 +1,5 @@
+# Portal Calendar exporter uses only the Python standard library.
+# External tools (not pip packages) required on the Mac:
+#   - meta   (Meta CLI, pre-installed) for calendar access
+#   - adb    (for pushing files to the Portal)
+#   - jq     (used by scripts/*.sh)

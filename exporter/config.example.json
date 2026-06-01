@@ -1,0 +1,15 @@
+{
+  "account": "you@meta.com",
+  "serial": "REPLACE_WITH_ADB_SERIAL",
+  "package": "com.ikosoy.portalcalendar",
+  "daysAhead": 7,
+  "includeDeclined": false,
+  "adb": "adb",
+  "meta": "meta",
+  "display": {
+    "title": "you@meta.com",
+    "timeFormat": "12h",
+    "maxEvents": 50,
+    "refreshMinutes": 15
+  }
+}
