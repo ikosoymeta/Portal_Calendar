@@ -76,9 +76,16 @@ html, body {
 #agenda {
   flex: 1;
   margin-top: 2.2vh;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2f37 transparent;
 }
+#agenda::-webkit-scrollbar { width: 8px; }
+#agenda::-webkit-scrollbar-thumb { background: #2a2f37; border-radius: 4px; }
+#agenda::-webkit-scrollbar-track { background: transparent; }
+#events { padding-bottom: 4vh; }
 
 .placeholder {
   color: var(--muted);

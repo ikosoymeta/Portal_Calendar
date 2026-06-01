@@ -15,6 +15,8 @@ background, with a live clock — turning a Portal into a desk calendar.
 - Big clock + date header; auto-refreshes throughout the day.
 - **Tap any event** for a detail card (organizer, attendees, notes, and a **Join**
   button for video calls); **⌂ Home button** returns to the Portal home.
+- **Scrollable** agenda (swipe) with gentle **auto-scroll** so all upcoming events
+  cycle into view on their own.
 
 ![Event detail](img/detail.png)
 

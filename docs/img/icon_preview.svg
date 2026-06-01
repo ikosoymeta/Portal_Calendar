@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="216" height="216" viewBox="0 0 108 108">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4F9DFF"/>
+      <stop offset="1" stop-color="#2B5FD6"/>
+    </linearGradient>
+  </defs>
+  <!-- Portal-style rounded tile -->
+  <rect x="0" y="0" width="108" height="108" rx="25" fill="url(#bg)"/>
+  <!-- calendar glyph (matches app/res/drawable/ic_launcher_foreground.xml) -->
+  <rect x="28" y="40" width="52" height="42" fill="#FFFFFF"/>
+  <rect x="28" y="40" width="52" height="11" fill="#1E63D6"/>
+  <rect x="39" y="33" width="5" height="13" fill="#FFFFFF"/>
+  <rect x="64" y="33" width="5" height="13" fill="#FFFFFF"/>
+  <rect x="37" y="60" width="34" height="4" fill="#4F9DFF"/>
+  <rect x="37" y="69" width="22" height="4" fill="#4F9DFF"/>
+</svg>

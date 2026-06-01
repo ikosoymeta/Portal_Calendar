@@ -107,6 +107,12 @@ function renderCalendar(events, config) {
   }
   $("placeholder").style.display = "none";
 
+  // Skip DOM rebuild when the events are unchanged — preserves scroll position
+  // (and auto-scroll) across the periodic 30s data refresh.
+  var sig = JSON.stringify(data.events);
+  if (sig === STATE.lastSig && $("events").children.length) return;
+  STATE.lastSig = sig;
+
   // Group by day.
   var groups = [];
   var byKey = {};
@@ -238,6 +244,28 @@ window.__onBack = function () {
     while (el && el !== this && !el.hasAttribute("data-idx")) el = el.parentNode;
     if (el && el.hasAttribute("data-idx")) openDetail(parseInt(el.getAttribute("data-idx"), 10));
   });
+})();
+
+/* ---------- auto-scroll (passive viewing) ---------- */
+var lastUserScroll = 0, scrollDir = 1, pauseUntil = 0;
+(function setupAutoScroll() {
+  var a = $("agenda");
+  // Real user interaction pauses auto-scroll for 15s. (Not 'scroll' — that would
+  // fire from our own auto-scroll and pause forever.)
+  ["touchstart", "pointerdown", "wheel", "mousedown", "keydown"].forEach(function (ev) {
+    a.addEventListener(ev, function () { lastUserScroll = Date.now(); }, { passive: true });
+  });
+  setInterval(function () {
+    var cfg = STATE.config || {};
+    if (cfg.autoScroll === false || isDetailOpen()) return;
+    var now = Date.now();
+    if (now < pauseUntil || now - lastUserScroll < 15000) return;
+    var max = a.scrollHeight - a.clientHeight;
+    if (max <= 4) return;  // everything fits; nothing to scroll
+    a.scrollTop += scrollDir * 1.2;
+    if (scrollDir > 0 && a.scrollTop >= max - 1) { scrollDir = -1; pauseUntil = now + 4000; }
+    else if (scrollDir < 0 && a.scrollTop <= 1) { scrollDir = 1; pauseUntil = now + 4000; }
+  }, 40);
 })();
 
 // Expose for the native Activity.

@@ -46,6 +46,7 @@ subset below).
 | `timeFormat` | `12h` | `12h` or `24h`. |
 | `maxEvents` | `50` | Max events rendered. |
 | `refreshMinutes` | `5` | LaunchAgent `StartInterval` used by `scripts/schedule.sh` (minutes between syncs). |
+| `autoScroll` | `true` | Gently auto-scrolls the agenda so a passive viewer sees all events; pauses 15s after any touch. The list is also manually scrollable. |
 
 ## On-device refresh
 

@@ -11,11 +11,12 @@ load("@fbsource//tools/build_defs:fb_native_wrapper.bzl", "fb_native")
 
 oncall("gator")
 
-# Bundle assets/ (index.html, app.js, app.css, *.json) into the APK at assets/*.
+# Bundle assets/ (html/js/css/json) and res/ (launcher icon) into the APK.
 fb_native.android_resource(
     name = "portal_calendar-assets",
     package = "com.ikosoy.portalcalendar",
     assets = "assets",
+    res = "res",
     visibility = ["PUBLIC"],
 )
 

@@ -11,6 +11,7 @@
     "title": "you@meta.com",
     "timeFormat": "12h",
     "maxEvents": 50,
-    "refreshMinutes": 5
+    "refreshMinutes": 5,
+    "autoScroll": true
   }
 }
