@@ -33,7 +33,10 @@ DEFAULT_CONFIG = os.path.join(HERE, "config.json")
 META_COLUMNS = ",".join([
     "subject", "start", "end", "is_all_day", "locations",
     "meeting_link", "response_status", "attendees", "is_canceled",
+    "organizer", "body_text",
 ])
+
+MAX_ATTENDEES = 20
 
 
 def log(msg):
@@ -83,6 +86,35 @@ def _to_iso_local(s, all_day):
     return s
 
 
+def _clean_location(loc):
+    """Strip leading building/room codes like '[LAX2126.02] ' -> friendly name."""
+    if _is_none(loc):
+        return ""
+    parts = [p.strip() for p in str(loc).split(";")]
+    cleaned = []
+    for p in parts:
+        # drop a leading "[CODE] " prefix if a name follows it
+        if p.startswith("[") and "]" in p:
+            after = p[p.index("]") + 1:].strip()
+            cleaned.append(after or p)
+        else:
+            cleaned.append(p)
+    return "; ".join([c for c in cleaned if c])
+
+
+def _attendee_names(attendees):
+    """meta attendees -> list of short display names (email local-part)."""
+    if not isinstance(attendees, list):
+        return []
+    names = []
+    for a in attendees[:MAX_ATTENDEES]:
+        email = a.get("email") if isinstance(a, dict) else str(a)
+        if not email:
+            continue
+        names.append(email.split("@")[0].replace(".", " ").title())
+    return names
+
+
 def normalize(rows, include_declined=False):
     events = []
     for r in rows:
@@ -94,16 +126,23 @@ def normalize(rows, include_declined=False):
         all_day = str(r.get("is_all_day", "")).lower() == "yes"
         attendees = r.get("attendees")
         attendee_count = len(attendees) if isinstance(attendees, list) else 0
-        location = r.get("locations")
         meeting_link = r.get("meeting_link")
+        organizer = r.get("organizer")
+        notes = r.get("body_text") or ""
+        if len(notes) > 1000:
+            notes = notes[:1000].rstrip() + "…"
         events.append({
             "title": r.get("subject") or "(no title)",
             "start": _to_iso_local(r.get("start"), all_day),
             "end": _to_iso_local(r.get("end"), all_day),
             "allDay": all_day,
-            "location": "" if _is_none(location) else location,
+            "location": _clean_location(r.get("locations")),
             "isVideoCall": not _is_none(meeting_link),
+            "joinUrl": "" if _is_none(meeting_link) else meeting_link,
+            "organizer": "" if _is_none(organizer) else organizer,
+            "attendees": _attendee_names(attendees),
             "attendeeCount": attendee_count,
+            "notes": notes.strip(),
             "status": status,
         })
     events.sort(key=lambda e: e["start"] or "")
@@ -175,6 +214,13 @@ def main():
     adb_push(adb_bin, serial, package, config_path, "config.json", verbose=args.verbose)
     adb_push(adb_bin, serial, package, events_path, "events.json", verbose=args.verbose)
     log(f"pushed to {serial}:/sdcard/Android/data/{package}/files/")
+
+    # Optional kiosk behavior: bring the app to the foreground so the display
+    # stays up and current. Off by default (don't steal focus during calls).
+    if cfg.get("keepForeground"):
+        subprocess.run([adb_bin, "-s", serial, "shell", "am", "start", "-n",
+                        f"{package}/.MainActivity"], capture_output=True, text=True)
+        log("kept app in foreground (keepForeground=true)")
 
 
 if __name__ == "__main__":

@@ -4,12 +4,13 @@
   "package": "com.ikosoy.portalcalendar",
   "daysAhead": 7,
   "includeDeclined": false,
+  "keepForeground": false,
   "adb": "adb",
   "meta": "meta",
   "display": {
     "title": "you@meta.com",
     "timeFormat": "12h",
     "maxEvents": 50,
-    "refreshMinutes": 15
+    "refreshMinutes": 5
   }
 }

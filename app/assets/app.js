@@ -96,6 +96,9 @@ function renderCalendar(events, config) {
     .sort(function (a, b) { return a.start - b.start; })
     .slice(0, maxEvents);
 
+  list.forEach(function (e, i) { e.idx = i; });
+  STATE.flat = list;
+
   if (list.length === 0) {
     $("placeholder").textContent = "No upcoming events 🎉";
     $("placeholder").style.display = "block";
@@ -155,7 +158,7 @@ function eventHtml(e, now, cfg) {
 
   var meta = tags.length ? '<div class="meta">' + tags.join('<span class="tag"></span> ') + "</div>" : "";
 
-  return '<div class="' + cls + '">' +
+  return '<div class="' + cls + '" data-idx="' + e.idx + '">' +
     '<div class="when">' + when + "</div>" +
     '<div class="body"><div class="title">' + esc(raw.title || "(no title)") + "</div>" + meta + "</div>" +
     "</div>";
@@ -166,6 +169,76 @@ function esc(s) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
   });
 }
+
+/* ---------- detail overlay ---------- */
+function goHome() {
+  if (window.Android && window.Android.goHome) window.Android.goHome();
+}
+
+function openJoin(url) {
+  if (window.Android && window.Android.openUrl) window.Android.openUrl(url);
+  else window.open(url, "_blank");
+}
+
+function fmtRange(e, cfg) {
+  var s = parseLocal(e.start), en = parseLocal(e.end);
+  if (e.allDay) return "All day · " + dayLabel(s || new Date());
+  var f = cfg.timeFormat || "12h";
+  var day = s ? dayLabel(s) : "";
+  return day + " · " + (s ? fmtTime(s, f) : "") + (en ? " – " + fmtTime(en, f) : "");
+}
+
+function openDetail(idx) {
+  var item = STATE.flat && STATE.flat[idx];
+  if (!item) return;
+  var raw = item.raw;
+  var cfg = STATE.config || {};
+  var rows = "";
+  rows += '<div class="ov-row"><span class="ico">🕑</span><span class="val">' + esc(fmtRange(item, cfg)) + "</span></div>";
+  if (raw.location) rows += '<div class="ov-row"><span class="ico">📍</span><span class="val">' + esc(raw.location) + "</span></div>";
+  if (raw.isVideoCall) rows += '<div class="ov-row"><span class="ico">📹</span><span class="val">Video call</span></div>';
+  if (raw.organizer) rows += '<div class="ov-row"><span class="ico">📧</span><span class="val">' + esc(raw.organizer) + "</span></div>";
+  if (raw.attendees && raw.attendees.length) {
+    var more = raw.attendeeCount && raw.attendeeCount > raw.attendees.length
+      ? " +" + (raw.attendeeCount - raw.attendees.length) + " more" : "";
+    rows += '<div class="ov-row"><span class="ico">👥</span><span class="val ov-attendees">' +
+      esc(raw.attendees.join(", ")) + esc(more) + "</span></div>";
+  } else if (raw.attendeeCount) {
+    rows += '<div class="ov-row"><span class="ico">👥</span><span class="val ov-attendees">' + raw.attendeeCount + " attendees</span></div>";
+  }
+  if (raw.status && raw.status !== "accepted" && raw.status !== "organizer") {
+    rows += '<div class="ov-row"><span class="ico">↩︎</span><span class="val">' + esc(raw.status) + "</span></div>";
+  }
+  if (raw.notes) rows += '<div class="ov-notes">' + esc(raw.notes) + "</div>";
+  if (raw.isVideoCall && raw.joinUrl) {
+    rows += '<button class="ov-join" onclick="openJoin(' + JSON.stringify(raw.joinUrl).replace(/"/g, "&quot;") + ')">Join video call</button>';
+  }
+
+  $("overlay-body").innerHTML = '<div class="ov-title">' + esc(raw.title || "(no title)") + "</div>" + rows;
+  $("overlay").classList.remove("hidden");
+}
+
+function closeDetail() { $("overlay").classList.add("hidden"); }
+function isDetailOpen() { return !$("overlay").classList.contains("hidden"); }
+
+// Back button (from native): close overlay if open; return true if handled.
+window.__onBack = function () {
+  if (isDetailOpen()) { closeDetail(); return true; }
+  return false;
+};
+
+(function setupUi() {
+  $("home-btn").addEventListener("click", goHome);
+  $("overlay-close").addEventListener("click", closeDetail);
+  $("overlay").addEventListener("click", function (ev) {
+    if (ev.target === $("overlay")) closeDetail();  // click backdrop
+  });
+  $("events").addEventListener("click", function (ev) {
+    var el = ev.target;
+    while (el && el !== this && !el.hasAttribute("data-idx")) el = el.parentNode;
+    if (el && el.hasAttribute("data-idx")) openDetail(parseInt(el.getAttribute("data-idx"), 10));
+  });
+})();
 
 // Expose for the native Activity.
 window.renderCalendar = renderCalendar;

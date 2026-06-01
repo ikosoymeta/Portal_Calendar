@@ -23,6 +23,7 @@ DEST="$REMOTE_HOME/fbsource/$SAMPLE_SUBPATH"
 echo "syncing app/ -> $DEST"
 
 tar czf /tmp/pc_app.tgz -C "$APP_DIR" .
+ek run -s "$SID" "rm -f /tmp/pc_app.tgz"            # ek push won't overwrite
 ek push -s "$SID" /tmp/pc_app.tgz /tmp/ >/dev/null
 ek run -s "$SID" "mkdir -p $DEST && rm -rf $DEST/* && tar xzf /tmp/pc_app.tgz -C $DEST"
 
@@ -33,6 +34,7 @@ APK_REL="$(echo "$OUT" | awk '/portal_calendar_arm64\.apk$/ {print $NF}' | tail 
 [ -n "$APK_REL" ] || { echo "ERROR: could not find APK path in build output"; exit 1; }
 
 mkdir -p "$DIST"
+rm -f "$DIST/portal_calendar_arm64.apk"             # ek pull won't overwrite
 ek pull -s "$SID" "$REMOTE_HOME/fbsource/$APK_REL" "$DIST/" >/dev/null
 cp -f "$DIST/portal_calendar_arm64.apk" "$DIST/PortalCalendar.apk"
 echo "APK -> $DIST/PortalCalendar.apk"

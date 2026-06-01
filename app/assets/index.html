@@ -9,6 +9,7 @@
 <body>
   <div id="app">
     <header id="topbar">
+      <button id="home-btn" title="Home" aria-label="Home">⌂</button>
       <div id="clock">
         <div id="time">--:--</div>
         <div id="date">&nbsp;</div>
@@ -23,6 +24,13 @@
       <div id="placeholder" class="placeholder">Waiting for first calendar sync…</div>
       <div id="events"></div>
     </main>
+  </div>
+
+  <div id="overlay" class="overlay hidden">
+    <div id="overlay-card" role="dialog" aria-modal="true">
+      <button id="overlay-close" aria-label="Close">×</button>
+      <div id="overlay-body"></div>
+    </div>
   </div>
 
   <script src="app.js"></script>

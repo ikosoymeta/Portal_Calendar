@@ -13,6 +13,10 @@ background, with a live clock — turning a Portal into a desk calendar.
   tentative status for each event.
 - Highlights the meeting that's happening **now**.
 - Big clock + date header; auto-refreshes throughout the day.
+- **Tap any event** for a detail card (organizer, attendees, notes, and a **Join**
+  button for video calls); **⌂ Home button** returns to the Portal home.
+
+![Event detail](img/detail.png)
 
 ## How it works (no sign-in on the device)
 

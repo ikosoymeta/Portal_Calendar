@@ -36,6 +36,23 @@ html, body {
   border-bottom: 1px solid var(--line);
 }
 
+#home-btn {
+  flex: 0 0 auto;
+  margin-right: 2vw;
+  margin-top: 0.5vh;
+  width: 7.5vh;
+  height: 7.5vh;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--fg);
+  font-size: 4vh;
+  line-height: 1;
+  cursor: pointer;
+}
+#home-btn:active { background: #1c1f24; }
+#clock { flex: 1; }
+
 #time {
   font-size: 9.5vh;
   font-weight: 700;
@@ -89,7 +106,9 @@ html, body {
   border-radius: 12px;
   background: var(--card);
   margin-bottom: 1vh;
+  cursor: pointer;
 }
+.event:active { filter: brightness(1.4); }
 
 .event.now {
   background: var(--now);
@@ -137,3 +156,60 @@ html, body {
 
 #events.fade { animation: fadein 0.4s ease; }
 @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---- detail overlay ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.hidden { display: none; }
+
+#overlay-card {
+  position: relative;
+  width: 64vw;
+  max-height: 84vh;
+  overflow-y: auto;
+  background: #14171c;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 4vh 4vw 4vh;
+}
+
+#overlay-close {
+  position: absolute;
+  top: 1.5vh;
+  right: 1.5vw;
+  width: 6vh;
+  height: 6vh;
+  border-radius: 50%;
+  border: none;
+  background: #20242b;
+  color: var(--fg);
+  font-size: 3.5vh;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ov-title { font-size: 3.4vh; font-weight: 700; margin-bottom: 1.4vh; padding-right: 6vw; }
+.ov-row { display: flex; gap: 1.2vw; font-size: 2.2vh; margin-bottom: 1.2vh; color: #d7dbe0; }
+.ov-row .ico { width: 3vh; flex: 0 0 auto; }
+.ov-row .val { flex: 1; }
+.ov-notes { white-space: pre-wrap; color: var(--muted); font-size: 2vh; margin-top: 1vh; line-height: 1.4; }
+.ov-attendees { color: var(--muted); font-size: 2vh; }
+.ov-join {
+  display: inline-block;
+  margin-top: 2vh;
+  padding: 1.3vh 2.4vw;
+  background: var(--accent);
+  color: #06121f;
+  font-weight: 700;
+  font-size: 2.2vh;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}

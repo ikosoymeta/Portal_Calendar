@@ -62,25 +62,44 @@ Within ~30s the Portal shows your agenda. (Re-open the app to refresh instantly.
 
 ## Keep it fresh (schedule)
 
-Install a cron entry on the Mac that re-runs the exporter every
-`display.refreshMinutes` minutes:
+The exporter is scheduled with a macOS **LaunchAgent** (not cron — macOS sandboxes
+`crontab`). It re-runs every `display.refreshMinutes` minutes:
 
 ```bash
-scripts/schedule.sh install     # add
+scripts/schedule.sh install     # create + load the LaunchAgent
 scripts/schedule.sh status      # check
-scripts/schedule.sh remove      # remove
+scripts/schedule.sh remove      # unload + delete
 ```
 
 Logs: `~/Library/Logs/portal-calendar.log`.
 
-## Make it the default screen (optional)
+> If `install` prints "could not load from this shell", the plist is still
+> written — it loads automatically at your next login, or load it now from a real
+> Terminal:
+> `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.ikosoy.portalcalendar.plist`
 
-Keep the app foreground; it sets `FLAG_KEEP_SCREEN_ON` so the Portal won't sleep
-while it's showing. To return to it after other use, just relaunch:
+## Launching & navigating on the Portal
 
-```bash
-adb -s <SERIAL> shell am start -n com.ikosoy.portalcalendar/.MainActivity
-```
+On a retail Portal **user build**, sideloaded apps do **not** appear in the
+curated Apps grid (that list is privileged), so launch the app one of these ways:
+
+- **From the Mac (reliable):** `scripts/open.sh` (or
+  `adb -s <SERIAL> shell am start -n com.ikosoy.portalcalendar/.MainActivity`).
+- **On-device (if debug settings are enabled):** Portal Settings →
+  debug settings → **Android Launcher** → Portal Calendar (requires the
+  `aloha_debug_settings` GateKeeper).
+
+Inside the app:
+
+- **⌂ Home button** (top-left) — returns to the Portal home screen. (Back does too.)
+- **Tap any event** — opens a detail card (time, location, organizer, attendees,
+  notes, and a **Join** button for video calls). Tap × or outside to close.
+
+### Always-on display (optional)
+
+The app sets `FLAG_KEEP_SCREEN_ON`, so it won't sleep while showing. To make the
+scheduled sync also re-foreground the app each run (kiosk style), set
+`"keepForeground": true` in `exporter/config.json`.
 
 ## Troubleshooting
 
@@ -91,3 +110,5 @@ adb -s <SERIAL> shell am start -n com.ikosoy.portalcalendar/.MainActivity
 | `meta` returns no data | Run `meta calendar.meeting list --days=1` directly to check access |
 | `scripts/build.sh` says no peer | `ek connect <devserver>` in a real terminal, then retry |
 | Install fails: signature mismatch | `adb -s <SERIAL> uninstall com.ikosoy.portalcalendar` then reinstall |
+| Schedule won't load from shell | Expected — loads at next login, or run the `launchctl bootstrap` line above in a real Terminal |
+| App not in the Portal Apps grid | Expected on a user build; launch via `scripts/open.sh` (see Launching above) |

@@ -34,6 +34,7 @@ subset below).
 | `package` | `com.ikosoy.portalcalendar` | App package id; the push target dir derives from it. |
 | `daysAhead` | `7` | How many days of events to fetch. |
 | `includeDeclined` | `false` | Include meetings you've declined. |
+| `keepForeground` | `false` | After each sync, re-launch the app to the foreground (kiosk/always-on). Off by default so it won't steal focus during calls. |
 | `adb` | `adb` | Path to the `adb` binary. |
 | `meta` | `meta` | Path to the `meta` CLI. |
 
@@ -44,7 +45,7 @@ subset below).
 | `title` | account | Text shown top-right on the Portal. |
 | `timeFormat` | `12h` | `12h` or `24h`. |
 | `maxEvents` | `50` | Max events rendered. |
-| `refreshMinutes` | `15` | Used by `scripts/schedule.sh` for the cron interval. |
+| `refreshMinutes` | `5` | LaunchAgent `StartInterval` used by `scripts/schedule.sh` (minutes between syncs). |
 
 ## On-device refresh
 

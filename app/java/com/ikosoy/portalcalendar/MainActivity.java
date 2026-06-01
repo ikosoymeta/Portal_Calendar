@@ -1,11 +1,15 @@
 package com.ikosoy.portalcalendar;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
@@ -58,6 +62,7 @@ public class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
+        webView.addJavascriptInterface(new Bridge(), "Android");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -90,6 +95,46 @@ public class MainActivity extends Activity {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             enterImmersiveMode();
+        }
+    }
+
+    /** Back closes an open detail overlay (via JS) or otherwise returns to home. */
+    @Override
+    public void onBackPressed() {
+        if (webView == null) {
+            super.onBackPressed();
+            return;
+        }
+        webView.evaluateJavascript(
+                "(window.__onBack && window.__onBack()) ? true : false",
+                new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String handled) {
+                        if (!"true".equals(handled)) {
+                            moveTaskToBack(true);
+                        }
+                    }
+                });
+    }
+
+    /** JS bridge exposed to the web UI as window.Android.* */
+    private class Bridge {
+        @JavascriptInterface
+        public void goHome() {
+            Intent i = new Intent(Intent.ACTION_MAIN);
+            i.addCategory(Intent.CATEGORY_HOME);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        }
+
+        @JavascriptInterface
+        public void openUrl(String url) {
+            try {
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+            } catch (Exception ignored) {
+            }
         }
     }
 

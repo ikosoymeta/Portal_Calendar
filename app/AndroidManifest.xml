@@ -12,6 +12,7 @@
 
     <application
         android:label="Portal Calendar"
+        android:icon="@android:drawable/ic_menu_my_calendar"
         android:allowBackup="false"
         android:usesCleartextTraffic="true">
         <activity
