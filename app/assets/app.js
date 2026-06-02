@@ -61,6 +61,8 @@ function tickClock() {
 function renderCalendar(events, config) {
   if (events) STATE.events = events;
   if (config) STATE.config = config;
+  if (events && events.sources) STATE.sources = events.sources;
+  else if (config && config.sources) STATE.sources = config.sources;
   tickClock();
 
   var cfg = STATE.config || {};
@@ -229,14 +231,47 @@ function openDetail(idx) {
 function closeDetail() { $("overlay").classList.add("hidden"); }
 function isDetailOpen() { return !$("overlay").classList.contains("hidden"); }
 
-// Back button (from native): close overlay if open; return true if handled.
+/* ---------- settings / calendars panel ---------- */
+function openSettings() {
+  var sources = STATE.sources || [];
+  var ev = STATE.events || {};
+  var cfg = STATE.config || {};
+  var html = '<div class="set-title">Calendars</div>';
+  var acct = ev.account || cfg.title || "";
+  var synced = "";
+  if (ev.generatedAt) { var g = parseLocal(ev.generatedAt); synced = g ? "last synced " + fmtTime(g, cfg.timeFormat || "12h") : ""; }
+  html += '<div class="set-sub">' + esc(acct) + (synced ? " · " + esc(synced) : "") + "</div>";
+  if (sources.length) {
+    sources.forEach(function (s) {
+      html += '<div class="set-row"><span class="set-dot" style="background:' + esc(s.color || "#4f9dff") + '"></span><span>' + esc(s.name || "Calendar") + "</span></div>";
+    });
+  } else {
+    html += '<div class="set-row set-dim">No sources configured.</div>';
+  }
+  html += '<div class="set-note">Calendars are configured on your Mac (no on-device sign-in). ' +
+    'To <b>add Google / Yahoo / Outlook</b>, paste the calendar\'s private iCal/ICS URL into ' +
+    '<code>exporter/config.json</code> &rarr; <code>calendars[]</code> and re-run the exporter. ' +
+    'To set <b>your account</b>, run <code>scripts/setup.sh</code>. Each calendar shows in its own color above.</div>';
+  $("settings-body").innerHTML = html;
+  $("settings").classList.remove("hidden");
+}
+function closeSettings() { $("settings").classList.add("hidden"); }
+function isSettingsOpen() { return !$("settings").classList.contains("hidden"); }
+
+// Back button (from native): close any open overlay; return true if handled.
 window.__onBack = function () {
+  if (isSettingsOpen()) { closeSettings(); return true; }
   if (isDetailOpen()) { closeDetail(); return true; }
   return false;
 };
 
 (function setupUi() {
   $("home-btn").addEventListener("click", goHome);
+  $("settings-btn").addEventListener("click", openSettings);
+  $("settings-close").addEventListener("click", closeSettings);
+  $("settings").addEventListener("click", function (ev) {
+    if (ev.target === $("settings")) closeSettings();  // click backdrop
+  });
   $("overlay-close").addEventListener("click", closeDetail);
   $("overlay").addEventListener("click", function (ev) {
     if (ev.target === $("overlay")) closeDetail();  // click backdrop

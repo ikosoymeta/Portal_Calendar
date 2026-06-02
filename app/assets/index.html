@@ -10,6 +10,7 @@
   <div id="app">
     <header id="topbar">
       <button id="home-btn" title="Home" aria-label="Home">⌂</button>
+      <button id="settings-btn" title="Calendars" aria-label="Calendars">⚙</button>
       <div id="clock">
         <div id="time">--:--</div>
         <div id="date">&nbsp;</div>
@@ -30,6 +31,13 @@
     <div id="overlay-card" role="dialog" aria-modal="true">
       <button id="overlay-close" aria-label="Close">×</button>
       <div id="overlay-body"></div>
+    </div>
+  </div>
+
+  <div id="settings" class="overlay hidden">
+    <div id="overlay-card" role="dialog" aria-modal="true">
+      <button id="settings-close" aria-label="Close">×</button>
+      <div id="settings-body"></div>
     </div>
   </div>
 
