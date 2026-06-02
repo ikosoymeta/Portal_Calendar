@@ -64,9 +64,11 @@ def _is_none(v):
 # --------------------------------------------------------------------------- #
 # Meta CLI source
 # --------------------------------------------------------------------------- #
-def fetch_meta(days, meta_bin, verbose=False):
+def fetch_meta(days, meta_bin, verbose=False, limit=500):
+    # NOTE: `meta calendar.meeting list` defaults to --limit=10, which silently
+    # truncates the calendar. Pass a high limit so all events in the window return.
     cmd = [meta_bin, "calendar.meeting", "list",
-           f"--days={days}", "--output=json", f"--columns={META_COLUMNS}"]
+           f"--days={days}", f"--limit={limit}", "--output=json", f"--columns={META_COLUMNS}"]
     if verbose:
         log("running: " + " ".join(cmd))
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -425,7 +427,8 @@ def main():
         sources.append({"name": name, "color": color})
         try:
             if ctype == "meta":
-                rows = fetch_meta(days, meta_bin, verbose=args.verbose)
+                rows = fetch_meta(days, meta_bin, verbose=args.verbose,
+                                  limit=int(cfg.get("metaLimit", 500)))
                 evs = normalize_meta(rows, include_declined)
             elif ctype == "ics":
                 if not cal.get("url"):

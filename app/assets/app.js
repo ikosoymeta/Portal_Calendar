@@ -222,8 +222,11 @@ function renderAgenda(data) {
   var cfg = STATE.config || {};
   $("account").textContent = cfg.title || (STATE.meta && STATE.meta.account) || "Portal Calendar";
   if (STATE.meta && STATE.meta.generatedAt) {
-    var g = parseLocal(STATE.meta.generatedAt);
-    $("synced").textContent = g ? "Synced " + fmtTime(g, cfg.timeFormat || "12h") : "";
+    var g = parseLocal(STATE.meta.generatedAt), f = cfg.timeFormat || "12h", rm = cfg.refreshMinutes || 5;
+    if (g) {
+      var nx = new Date(g.getTime() + rm * 60000);
+      $("synced").textContent = "Synced " + fmtTime(g, f) + " · next " + fmtTime(nx, f);
+    } else $("synced").textContent = "";
   }
   var now = new Date(), maxEvents = cfg.maxEvents || 100;
   var list = data.map(function (e) {
@@ -313,8 +316,13 @@ var pickColor = SWATCHES[0];
 function openSettings() {
   var cfg = STATE.config || {}, ev = STATE.meta || {};
   var html = '<div class="set-title">Calendars</div>';
-  var synced = ""; if (ev.generatedAt) { var g = parseLocal(ev.generatedAt); synced = g ? "Meta synced " + fmtTime(g, cfg.timeFormat || "12h") : ""; }
-  html += '<div class="set-sub">' + esc(ev.account || cfg.title || "") + (synced ? " · " + esc(synced) : "") + "</div>";
+  var f = cfg.timeFormat || "12h", rm = cfg.refreshMinutes || 5, syncline = "";
+  if (ev.generatedAt) {
+    var g = parseLocal(ev.generatedAt);
+    if (g) { var nx = new Date(g.getTime() + rm * 60000); syncline = "Meta synced " + fmtTime(g, f) + " · next ~" + fmtTime(nx, f) + " · auto every " + rm + " min from your Mac"; }
+  }
+  html += '<div class="set-sub">' + esc(ev.account || cfg.title || "") + "</div>";
+  if (syncline) html += '<div class="set-sub">' + esc(syncline) + "</div>";
   // built-in Meta source (Mac-pushed)
   html += '<div class="set-row"><span class="set-dot" style="background:#4f9dff"></span><span>Work (Meta)</span><span class="set-dim set-tag">pushed from Mac</span></div>';
   // on-device ICS calendars
@@ -330,7 +338,7 @@ function openSettings() {
     '<div class="set-sw">';
   SWATCHES.forEach(function (col) { html += '<span class="sw' + (col === pickColor ? " sel" : "") + '" data-col="' + col + '" style="background:' + col + '"></span>'; });
   html += '</div><div class="set-actions"><button id="cal-add" class="set-btn">Add &amp; sync</button>' +
-    '<button id="cal-refresh" class="set-btn ghost">Refresh all</button></div>' +
+    '<button id="cal-refresh" class="set-btn ghost">Refresh now</button></div>' +
     '<div class="set-help">Get the URL: Google → Settings → Integrate calendar → "Secret address in iCal format"; Outlook → Publish calendar (ICS); Yahoo → calendar ICS feed. The Work (Meta) calendar is managed on your Mac.</div></div>';
   $("settings-body").innerHTML = html;
   // wire
