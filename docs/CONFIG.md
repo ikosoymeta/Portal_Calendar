@@ -37,6 +37,37 @@ subset below).
 | `keepForeground` | `false` | After each sync, re-launch the app to the foreground (kiosk/always-on). Off by default so it won't steal focus during calls. |
 | `adb` | `adb` | Path to the `adb` binary. |
 | `meta` | `meta` | Path to the `meta` CLI. |
+| `calendars` | (Meta only) | List of calendar sources to merge — see below. |
+
+## Multiple calendars (Google / Yahoo / Outlook)
+
+Add extra calendars via the `calendars` array. Each entry is either your Meta
+work calendar (`type: "meta"`) or any calendar's private **iCal/ICS URL**
+(`type: "ics"`). No on-device sign-in is needed — the exporter fetches each feed
+on the Mac, merges them, and the app shows each source in its own color.
+
+```json
+"calendars": [
+  { "name": "Work (Meta)", "type": "meta", "color": "#4f9dff" },
+  { "name": "Google",  "type": "ics", "url": "<google-ics-url>",  "color": "#34a853" },
+  { "name": "Outlook", "type": "ics", "url": "<outlook-ics-url>", "color": "#0078d4" },
+  { "name": "Yahoo",   "type": "ics", "url": "<yahoo-ics-url>",   "color": "#7b1fa2" }
+]
+```
+
+An `ics` entry with an empty `url` is skipped, so fill in only the ones you use.
+
+### Where to get each provider's ICS URL
+
+| Provider | How to get the private iCal/ICS link |
+|---|---|
+| **Google** | calendar.google.com → Settings → *Settings for my calendars* → pick the calendar → **Integrate calendar** → **Secret address in iCal format** |
+| **Outlook / M365** | Outlook → Settings → Calendar → **Shared calendars** → *Publish a calendar* → publish → copy the **ICS** link |
+| **Yahoo** | Yahoo Calendar → the calendar's **Actions/Export** → copy the ICS feed URL |
+
+Notes: recurring events (daily/weekly/monthly) are expanded; UTC/`TZID` times are
+converted to your Mac's local timezone. Keep these URLs private — anyone with the
+link can read that calendar.
 
 ### Display settings (pushed to the device as `config.json`)
 

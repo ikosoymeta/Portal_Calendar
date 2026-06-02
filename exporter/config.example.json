@@ -7,6 +7,12 @@
   "keepForeground": false,
   "adb": "adb",
   "meta": "meta",
+  "calendars": [
+    { "name": "Work (Meta)", "type": "meta", "color": "#4f9dff" },
+    { "name": "Google", "type": "ics", "url": "https://calendar.google.com/calendar/ical/<id>/private-<token>/basic.ics", "color": "#34a853" },
+    { "name": "Outlook", "type": "ics", "url": "https://outlook.office365.com/owa/calendar/<id>/.../calendar.ics", "color": "#0078d4" },
+    { "name": "Yahoo", "type": "ics", "url": "https://caldav.calendar.yahoo.com/.../calendar.ics", "color": "#7b1fa2" }
+  ],
   "display": {
     "title": "you@meta.com",
     "timeFormat": "12h",

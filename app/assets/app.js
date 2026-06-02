@@ -164,7 +164,8 @@ function eventHtml(e, now, cfg) {
 
   var meta = tags.length ? '<div class="meta">' + tags.join('<span class="tag"></span> ') + "</div>" : "";
 
-  return '<div class="' + cls + '" data-idx="' + e.idx + '">' +
+  var color = raw.color || "#4f9dff";
+  return '<div class="' + cls + '" data-idx="' + e.idx + '" style="border-left:6px solid ' + esc(color) + '">' +
     '<div class="when">' + when + "</div>" +
     '<div class="body"><div class="title">' + esc(raw.title || "(no title)") + "</div>" + meta + "</div>" +
     "</div>";
@@ -200,6 +201,7 @@ function openDetail(idx) {
   var raw = item.raw;
   var cfg = STATE.config || {};
   var rows = "";
+  if (raw.source) rows += '<div class="ov-row"><span class="ico" style="color:' + esc(raw.color || "#4f9dff") + '">●</span><span class="val">' + esc(raw.source) + "</span></div>";
   rows += '<div class="ov-row"><span class="ico">🕑</span><span class="val">' + esc(fmtRange(item, cfg)) + "</span></div>";
   if (raw.location) rows += '<div class="ov-row"><span class="ico">📍</span><span class="val">' + esc(raw.location) + "</span></div>";
   if (raw.isVideoCall) rows += '<div class="ov-row"><span class="ico">📹</span><span class="val">Video call</span></div>';
