@@ -253,3 +253,15 @@ html, body {
 }
 .set-note b { color: var(--fg); }
 .set-note code { color: #d7dbe0; }
+.set-tag { margin-left: auto; color: var(--muted); font-size: 1.7vh; }
+.set-del { margin-left: 1.2vw; background: #2a1416; color: #ff8a80; border: none; border-radius: 8px; padding: 0.6vh 1.1vw; font-size: 1.7vh; cursor: pointer; }
+.set-add { margin-top: 2.4vh; border-top: 1px solid var(--line); padding-top: 2vh; }
+.set-addt { font-weight: 700; font-size: 2.1vh; margin-bottom: 1.2vh; }
+.set-in { display: block; width: 100%; box-sizing: border-box; margin-bottom: 1.2vh; padding: 1.2vh 1.2vw; background: #0e1014; color: var(--fg); border: 1px solid var(--line); border-radius: 10px; font-size: 2vh; }
+.set-sw { display: flex; gap: 1.2vw; margin-bottom: 1.6vh; }
+.sw { width: 3.4vh; height: 3.4vh; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+.sw.sel { border-color: #ffffff; }
+.set-actions { display: flex; gap: 1.2vw; }
+.set-btn { background: var(--accent); color: #06121f; font-weight: 700; border: none; border-radius: 10px; padding: 1.2vh 2.2vw; font-size: 2vh; cursor: pointer; }
+.set-btn.ghost { background: var(--card); color: var(--fg); border: 1px solid var(--line); }
+.set-help { margin-top: 1.6vh; color: var(--muted); font-size: 1.7vh; line-height: 1.4; }

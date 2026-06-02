@@ -60,8 +60,10 @@ public class MainActivity extends Activity {
         webView = new WebView(this);
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
+        settings.setDomStorageEnabled(true);           // localStorage: on-device calendar list
         settings.setAllowFileAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);  // let the local page fetch ICS feeds
         webView.addJavascriptInterface(new Bridge(), "Android");
 
         webView.setWebViewClient(new WebViewClient() {
