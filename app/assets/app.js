@@ -283,11 +283,37 @@ function renderCalendar(events, config) {
   if (config) STATE.config = config;
   tickClock();
   rebuildAndRender();
+  watchAgenda();          // refresh highlight, snap-to-next, and the 10-min notifier
 }
 
 /* ---------------- detail overlay ---------------- */
 function goHome() { if (window.Android && window.Android.goHome) window.Android.goHome(); }
 function openJoin(url) { if (window.Android && window.Android.openUrl) window.Android.openUrl(url); else window.open(url, "_blank"); }
+// Open a link from an event description. Video links go to the native handler
+// (Zoom/Meet app); everything else opens in the in-app browser so it works even
+// though the Portal has no standalone browser app.
+function openLink(url) {
+  if (!url) return;
+  if (VIDEO_RE.test(url) && window.Android && window.Android.openUrl) { window.Android.openUrl(url); return; }
+  if (window.Android && window.Android.openCalendar) { window.Android.openCalendar(url, "Link"); return; }
+  if (window.Android && window.Android.openUrl) { window.Android.openUrl(url); return; }
+  window.open(url, "_blank");
+}
+// Escape text and turn bare http(s) URLs into tappable links (trailing
+// punctuation like ")" or "." is left outside the link).
+function linkify(text) {
+  text = String(text == null ? "" : text);
+  var re = /(https?:\/\/[^\s<>"']+)/g, res = "", idx = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    var u = m[0], trail = "", tm = /[)\].,;:!?]+$/.exec(u);
+    if (tm) { trail = u.slice(u.length - tm[0].length); u = u.slice(0, u.length - tm[0].length); }
+    res += esc(text.slice(idx, m.index));
+    res += '<a class="ov-link" data-url="' + esc(u) + '">' + esc(u) + "</a>" + esc(trail);
+    idx = m.index + m[0].length;
+  }
+  res += esc(text.slice(idx));
+  return res;
+}
 function fmtRange(e, cfg) {
   var s = parseLocal(e.start), en = parseLocal(e.end), f = cfg.timeFormat || "12h";
   if (e.allDay) return "All day · " + dayLabel(s || new Date());
@@ -302,9 +328,13 @@ function openDetail(idx) {
   if (raw.isVideoCall) rows += '<div class="ov-row"><span class="ico">📹</span><span class="val">Video call</span></div>';
   if (raw.organizer) rows += '<div class="ov-row"><span class="ico">📧</span><span class="val">' + esc(raw.organizer) + "</span></div>";
   if (raw.attendees && raw.attendees.length) rows += '<div class="ov-row"><span class="ico">👥</span><span class="val ov-attendees">' + esc(raw.attendees.join(", ")) + "</span></div>";
-  if (raw.notes) rows += '<div class="ov-notes">' + esc(raw.notes) + "</div>";
+  if (raw.notes) rows += '<div class="ov-notes">' + linkify(raw.notes) + "</div>";
   if (raw.isVideoCall && raw.joinUrl) rows += '<button class="ov-join" onclick="openJoin(' + JSON.stringify(raw.joinUrl).replace(/"/g, "&quot;") + ')">Join video call</button>';
   $("overlay-body").innerHTML = '<div class="ov-title">' + esc(raw.title || "(no title)") + "</div>" + rows;
+  // make description links tappable (open in-app browser)
+  Array.prototype.forEach.call($("overlay-body").querySelectorAll(".ov-link"), function (el) {
+    el.addEventListener("click", function (e) { e.stopPropagation(); openLink(el.getAttribute("data-url")); });
+  });
   $("overlay").classList.remove("hidden");
 }
 function closeDetail() { $("overlay").classList.add("hidden"); }
@@ -426,8 +456,79 @@ var lastUserScroll = 0, scrollDir = 1, pauseUntil = 0;
   }, 40);
 })();
 
+/* ---- next-meeting snap + "starts in 10 min" notifier ---- */
+// Notify only for meetings you're attending: accepted, tentative (Maybe), or
+// ones you organize. (Declined / no-response are skipped.)
+var NOTIF_OK = { accepted: 1, tentative: 1, organizer: 1 };
+
+// Earliest event in the agenda that hasn't ended yet (STATE.flat is start-sorted).
+function nextUpcoming() {
+  var now = Date.now(), f = STATE.flat || [];
+  for (var i = 0; i < f.length; i++) {
+    var e = f[i], end = e.end ? e.end.getTime() : (e.start ? e.start.getTime() : 0);
+    if (end > now) return e;
+  }
+  return null;
+}
+function scrollToNextMeeting(smooth) {
+  var a = $("agenda"); if (!a) return;
+  var nx = nextUpcoming(); if (!nx) return;
+  var el = a.querySelector('[data-idx="' + nx.idx + '"]'); if (!el) return;
+  var grp = (el.closest && el.closest(".day-group")) || el;
+  var top = Math.max(0, grp.offsetTop - 6);
+  if (smooth && a.scrollTo) { try { a.scrollTo({ top: top, behavior: "smooth" }); } catch (e) { a.scrollTop = top; } }
+  else a.scrollTop = top;
+}
+function updateNotifier() {
+  var el = $("notifier"); if (!el) return;
+  if (isSettingsOpen()) { el.classList.add("hidden"); return; }
+  var now = Date.now(), soon = now + 10 * 60000, cfg = STATE.config || {}, f = cfg.timeFormat || "12h", pick = null;
+  (STATE.flat || []).forEach(function (it) {
+    var raw = it.raw; if (raw.allDay || !it.start) return;
+    var st = it.start.getTime(); if (st <= now || st > soon) return;
+    if (!((raw.status || "").toLowerCase() in NOTIF_OK)) return;
+    if (!pick || st < pick.start.getTime()) pick = it;
+  });
+  if (!pick) { el.classList.add("hidden"); el.innerHTML = ""; STATE.notifHtml = null; STATE.notifKey = null; return; }
+  var key = pick.raw.start + "|" + pick.raw.title;
+  if (STATE.notifDismissed === key) { el.classList.add("hidden"); return; }
+  var raw = pick.raw, mins = Math.max(1, Math.round((pick.start.getTime() - now) / 60000));
+  var html = '<button class="notif-x" onclick="event.stopPropagation();dismissNotif()" aria-label="Dismiss">×</button>' +
+    '<div class="notif-main" onclick="openDetail(' + pick.idx + ')">' +
+      '<div class="notif-when">⏰ Starts in ' + mins + ' min</div>' +
+      '<div class="notif-title">' + esc(raw.title || "(no title)") + "</div>" +
+      '<div class="notif-sub">' + esc(fmtTime(pick.start, f)) + (raw.location ? " · " + esc(raw.location) : "") + "</div>" +
+    "</div>" +
+    (raw.isVideoCall && raw.joinUrl ? '<button class="notif-join" onclick="event.stopPropagation();openJoin(' + JSON.stringify(raw.joinUrl).replace(/"/g, "&quot;") + ')">Join</button>' : "");
+  if (html !== STATE.notifHtml) { el.innerHTML = html; STATE.notifHtml = html; }
+  STATE.notifIdx = pick.idx; STATE.notifKey = key;
+  el.classList.remove("hidden");
+}
+function dismissNotif() {
+  STATE.notifDismissed = STATE.notifKey;
+  var el = $("notifier"); if (el) { el.classList.add("hidden"); el.innerHTML = ""; STATE.notifHtml = null; }
+}
+window.dismissNotif = dismissNotif;
+
+// When an event ends, the "next meeting" changes: refresh now/past highlighting
+// and scroll the just-passed event off the top so the next one leads the agenda.
+function watchAgenda() {
+  var nx = nextUpcoming(), sig = nx ? (nx.raw.start + "|" + nx.raw.title) : "none";
+  if (sig !== STATE.nextSig) {
+    var first = STATE.nextSig === undefined;
+    STATE.nextSig = sig;
+    STATE.lastSig = null;          // force re-render to refresh .now/.past classes
+    rebuildAndRender();
+    if (!isDetailOpen() && !isSettingsOpen() && (first || Date.now() - lastUserScroll > 15000)) {
+      scrollToNextMeeting(!first);
+    }
+  }
+  updateNotifier();
+}
+
 /* ---------------- boot ---------------- */
 window.renderCalendar = renderCalendar;
+setInterval(watchAgenda, 15000);               // detect passed events + refresh notifier
 STATE.calendars = loadCals();
 setInterval(tickClock, 1000); tickClock();
 refreshAll();                                  // fetch on-device ICS calendars now

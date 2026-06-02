@@ -208,6 +208,8 @@ html, body {
 .ov-row .ico { width: 3vh; flex: 0 0 auto; }
 .ov-row .val { flex: 1; }
 .ov-notes { white-space: pre-wrap; color: var(--muted); font-size: 2vh; margin-top: 1vh; line-height: 1.4; }
+.ov-link { color: var(--accent); text-decoration: underline; word-break: break-all; cursor: pointer; }
+.ov-link:active { filter: brightness(1.4); }
 .ov-attendees { color: var(--muted); font-size: 2vh; }
 .ov-join {
   display: inline-block;
@@ -280,3 +282,46 @@ html, body {
   font-size: 2.6vh; font-weight: 700; color: #fff;
 }
 .svc-name { font-size: 1.9vh; font-weight: 600; }
+
+/* ---- "next meeting in N min" notifier banner ---- */
+.notifier {
+  position: fixed;
+  left: 50%;
+  bottom: 3.5vh;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 1.6vw;
+  min-width: 46vw;
+  max-width: 86vw;
+  padding: 1.8vh 2vw 1.8vh 2.4vw;
+  background: #11233a;
+  border: 1px solid var(--accent);
+  border-left: 8px solid var(--accent);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  animation: notif-in 0.35s ease;
+}
+.notifier.hidden { display: none; }
+@keyframes notif-in { from { opacity: 0; transform: translate(-50%, 1.5vh); } to { opacity: 1; transform: translate(-50%, 0); } }
+.notif-main { flex: 1; min-width: 0; cursor: pointer; }
+.notif-when { font-size: 1.9vh; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
+.notif-title {
+  font-size: 2.8vh; font-weight: 700; margin-top: 0.3vh;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.notif-sub { font-size: 2vh; color: var(--muted); margin-top: 0.3vh; }
+.notif-join {
+  flex: 0 0 auto;
+  background: var(--accent); color: #06121f; font-weight: 700;
+  font-size: 2.1vh; border: none; border-radius: 10px;
+  padding: 1.3vh 2.2vw; cursor: pointer;
+}
+.notif-join:active { filter: brightness(1.15); }
+.notif-x {
+  flex: 0 0 auto;
+  width: 4.6vh; height: 4.6vh; border-radius: 50%;
+  background: #20242b; color: var(--fg); border: none;
+  font-size: 2.8vh; line-height: 1; cursor: pointer;
+}
