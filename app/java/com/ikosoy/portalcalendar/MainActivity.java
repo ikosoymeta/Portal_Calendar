@@ -138,6 +138,18 @@ public class MainActivity extends Activity {
             } catch (Exception ignored) {
             }
         }
+
+        /** Open a provider's web calendar in the in-app browser (sign in on device). */
+        @JavascriptInterface
+        public void openCalendar(String url, String title) {
+            try {
+                Intent i = new Intent(MainActivity.this, CalendarWebActivity.class);
+                i.putExtra(CalendarWebActivity.EXTRA_URL, url);
+                i.putExtra(CalendarWebActivity.EXTRA_TITLE, title);
+                startActivity(i);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     private void enterImmersiveMode() {

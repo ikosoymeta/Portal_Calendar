@@ -313,6 +313,12 @@ function isDetailOpen() { return !$("overlay").classList.contains("hidden"); }
 /* ---------------- settings / calendars (editable on-device) ---------------- */
 var SWATCHES = ["#34a853", "#0078d4", "#7b1fa2", "#e8923b", "#e53935", "#00897b"];
 var pickColor = SWATCHES[0];
+// Calendar services the user can sign in to directly on the Portal (in-app browser).
+var SERVICES = [
+  { id: "google",  name: "Google Calendar",  color: "#1a73e8", glyph: "31", url: "https://calendar.google.com/calendar/u/0/r" },
+  { id: "outlook", name: "Outlook Calendar", color: "#0078d4", glyph: "O",  url: "https://outlook.office.com/calendar/" },
+  { id: "yahoo",   name: "Yahoo Calendar",   color: "#6001d2", glyph: "Y!", url: "https://calendar.yahoo.com/" }
+];
 function openSettings() {
   var cfg = STATE.config || {}, ev = STATE.meta || {};
   var html = '<div class="set-title">Calendars</div>';
@@ -325,14 +331,27 @@ function openSettings() {
   if (syncline) html += '<div class="set-sub">' + esc(syncline) + "</div>";
   // built-in Meta source (Mac-pushed)
   html += '<div class="set-row"><span class="set-dot" style="background:#4f9dff"></span><span>Work (Meta)</span><span class="set-dim set-tag">pushed from Mac</span></div>';
+  // ---- sign in to a calendar service, directly on the Portal ----
+  var hasBridge = !!(window.Android && window.Android.openCalendar);
+  if (hasBridge) {
+    html += '<div class="set-add"><div class="set-addt">Sign in to a calendar service</div>' +
+      '<div class="set-help" style="margin-top:0;margin-bottom:1.4vh">Open and log in on the Portal. Your session is remembered.</div>' +
+      '<div class="svc-tiles">';
+    SERVICES.forEach(function (s) {
+      html += '<button class="svc-tile" data-svc="' + esc(s.id) + '">' +
+        '<span class="svc-ic" style="background:' + s.color + '">' + s.glyph + '</span>' +
+        '<span class="svc-name">' + esc(s.name) + '</span></button>';
+    });
+    html += '</div></div>';
+  }
   // on-device ICS calendars
   STATE.calendars.forEach(function (c, i) {
     html += '<div class="set-row"><span class="set-dot" style="background:' + esc(c.color) + '"></span>' +
       '<span>' + esc(c.name) + '</span><span class="set-dim set-tag">' + esc(STATE.status[c.name] || "") + "</span>" +
       '<button class="set-del" data-del="' + i + '">Remove</button></div>';
   });
-  // add form
-  html += '<div class="set-add"><div class="set-addt">Add a calendar (Google / Yahoo / Outlook)</div>' +
+  // add form (advanced: merge a calendar into the unified agenda via its ICS feed)
+  html += '<div class="set-add"><div class="set-addt">Advanced: merge a calendar into this agenda (iCal/ICS)</div>' +
     '<input id="cal-name" class="set-in" placeholder="Name (e.g. Personal)"/>' +
     '<input id="cal-url" class="set-in" placeholder="Paste the calendar\'s iCal/ICS URL"/>' +
     '<div class="set-sw">';
@@ -342,6 +361,12 @@ function openSettings() {
     '<div class="set-help">Get the URL: Google → Settings → Integrate calendar → "Secret address in iCal format"; Outlook → Publish calendar (ICS); Yahoo → calendar ICS feed. The Work (Meta) calendar is managed on your Mac.</div></div>';
   $("settings-body").innerHTML = html;
   // wire
+  Array.prototype.forEach.call(document.querySelectorAll(".svc-tile"), function (el) {
+    el.addEventListener("click", function () {
+      var s = SERVICES.filter(function (x) { return x.id === el.getAttribute("data-svc"); })[0];
+      if (s && window.Android && window.Android.openCalendar) window.Android.openCalendar(s.url, s.name);
+    });
+  });
   Array.prototype.forEach.call(document.querySelectorAll(".sw"), function (el) {
     el.addEventListener("click", function () { pickColor = el.getAttribute("data-col"); Array.prototype.forEach.call(document.querySelectorAll(".sw"), function (x) { x.classList.remove("sel"); }); el.classList.add("sel"); });
   });

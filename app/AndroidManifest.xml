@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ikosoy.portalcalendar"
-    android:versionCode="2"
-    android:versionName="1.1">
+    android:versionCode="3"
+    android:versionName="1.2">
 
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29"/>
 
-    <!-- Only needed if a future config points the WebView at a remote URL.
-         The default exporter-push flow reads local files and needs no network. -->
+    <!-- Network is used for: the local page fetching ICS feeds, and the per-service
+         calendar sign-in WebView (Google/Outlook/Yahoo). The exporter-push flow
+         itself reads local files. -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
@@ -26,5 +27,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- In-app browser for per-service calendar sign-in (Google/Outlook/Yahoo). -->
+        <activity
+            android:name=".CalendarWebActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
     </application>
 </manifest>
